@@ -1,11 +1,11 @@
-# Run analyses for a corss-sectional study on perceived safety of people with Parkinson's Disease (PwPD): 
+# Run analyses for a corss-sectional study on perceived safety of people with Parkinson's Disease (PwPD):
 # Code developed by Florian Kuschel, Anna and David Pedrosa
 
 # Version 2.2 # 2024-26-11, # Smaller adjustments to make the code readble for different collaborators
-# Version 2.3 # 2024-01-12, # updated code with suggestions, added one comment/question in load_data 
-# Version 2.4 # 2024-04-12, # 
+# Version 2.3 # 2024-01-12, # updated code with suggestions, added one comment/question in load_data
+# Version 2.4 # 2024-04-12, #
 
-# ==== Preamble 
+# ==== Preamble
 # Set respective folders according to username to facilitate collaboration
 username <- Sys.getenv("USERNAME")
 
@@ -28,7 +28,7 @@ message("Working directory set to: ", wdir)  # Log message for debugging
 setwd(wdir)
 source("load_packages.R")
 
-# ==== load Data and preprocess 
+# ==== load Data and preprocess
 ## 1. Load SAFEPD raw (?) dataset
 # TODO: I am loading the imputed data for the following analysis; why not running teh imputation here?
 df_safepd <- read_xlsx(
@@ -50,7 +50,7 @@ source("SAFEPD_dist.R")
 # ====
 ## Descriptive analyses
 source("SAFEPD_descr.R")
-source("SAFEPD_descr_diag.R") 
+source("SAFEPD_descr_diag.R") #TODO: Cool functions!
 
 ## Korrelationsanalyse #TODO: Not used?
 # source("SAFEPD_corr.R")
