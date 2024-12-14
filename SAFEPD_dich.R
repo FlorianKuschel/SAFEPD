@@ -1,16 +1,10 @@
-# Imputation of data and recoding the variables in order to prepare for subsequent analyses in the SAFEPD study
+# Dichotomisation of data and recoding the variables for subsequent analyses in the SAFEPD study
 # Code developed by Florian Kuschel, Anna and David Pedrosa
 
 # Version 2.1 # 2024-26-11, # Added some additional options for enhancing readability in the code.
 # Version 2.2 # 2024-01-12, # updated the code with suggestions; added some comments/questions
 # Version 2.3 # added some minor comments, but ver difficult because of comments
-
-# multiple Imputation für NA einmal durchgeführt
-# missing_data <- df_safepd[rowSums(is.na(df_safepd)) > 0, , drop = FALSE]
-# imputed_missing_data <- mice(missing_data)
-# completed_missing_data <- complete(imputed_missing_data)
-# missing_rows <- which(rowSums(is.na(df_safepd)) > 0)
-# df_safepd[missing_rows, ] <- completed_missing_data
+# Version 2.4 # added an additional file in which the routine for imputation is shown
 
 # ==== Dichotomisation
 # Define the categories as factors for later
