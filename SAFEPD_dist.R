@@ -2,7 +2,7 @@
 # Code developed by Florian Kuschel and David Pedrosa
 
 # Version 2.2 # 2024-01-12, # updated the code with suggestions; added one questions to your comment on the UPDRS scores
-# Version 2.3 # 2024-15-12, # added KS-Test to test for normality 
+# Version 2.3 # 2024-15-12, # added KS-Test to test for normality, indicating normaldistribution for age (and UPDRS I), as seen in Q-Q-Plot 
 
 # Variables for normality test
 VarNVTest <- c(
