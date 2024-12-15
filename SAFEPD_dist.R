@@ -1,21 +1,12 @@
-# analyze and visualize normality and distribution of all variables
-# Code developed by Florian Kuschel, Anna and David Pedrosa
+# analyze and visualize normality and distribution of continous variables 
+# Code developed by Florian Kuschel and David Pedrosa
 
 # Version 2.2 # 2024-01-12, # updated the code with suggestions; added one questions to your comment on the UPDRS scores
+# Version 2.3 # 2024-15-12, # added KS-Test to test for normality 
 
 # Variables for normality test
 VarNVTest <- c(
-  "age", "gender", "nationality", "martial_status", "years_since_diagnosis",
-  "persons_houshold", "school_graduation", "professional_graduation",
-  "employment_status", "UPDRS_I_Score", "UPDRS_II_Score", "lack_of_information",
-  "uncertain_future", "chaging_symptom_severity", "gait_insecurity_fall",
-  "pain", "gastrointestinal_symptoms", "urinary_symptoms", "mental_abilities",
-  "mental_symptoms", "other_disease", "nursing_care", "side_effects_complications",
-  "access_healthcare", "communication_with_me", "communication_between_professionals",
-  "loneliness", "everyday_problems", "daily_routine", "overload_among_people",
-  "pejorativ_looks_comments", "family_role", "conflicts_with_relatives",
-  "victim_to_crime", "financial_worries", "not_at_peace_with_myself",
-  "participation_in_road_traffic", "overall_situation"
+  "age", "years_since_diagnosis", "UPDRS_I_Score", "UPDRS_II_Score"
 )
 
 # Shapiro-Wilk normality tests
@@ -23,8 +14,8 @@ shapiro_results <- lapply(VarNVTest, function(variable) {
   if (is.numeric(df_safepd[[variable]])) {
     test <- shapiro.test(df_safepd[[variable]])
     data.frame(
-      Variable = variable,
-      p_value = test$p.value,
+      Variable = variable, 
+      p_value = test$p.value, 
       is_normal = test$p.value > 0.05
     )
   } else {
@@ -32,52 +23,79 @@ shapiro_results <- lapply(VarNVTest, function(variable) {
   }
 })
 
+# Kolmogorov-Smirnov normality tests
+ks_results <- lapply(VarNVTest, function(variable) {
+  if (is.numeric(df_safepd[[variable]])) {
+    # Kolmogorov-Smirnov-Test (vergleicht mit einer Normalverteilung)
+    test <- ks.test(df_safepd[[variable]], "pnorm", mean(df_safepd[[variable]]), sd(df_safepd[[variable]]))
+    
+    # Ergebnis als DataFrame speichern
+    data.frame(
+      Variable = variable, 
+      p_value = test$p.value, 
+      is_normal = test$p.value > 0.05
+    )
+  } else {
+    data.frame(Variable = variable, p_value = NA, is_normal = NA)
+  }
+})
+
+# Combine results for Shapiro-Wilk and Kolmogorov-Smirnov tests
 shapiro_results_table <- do.call(rbind, shapiro_results)
-write.csv(shapiro_results_table, file.path(wdir, "results", "suppl.table1.shapiro_results.csv"), row.names = FALSE)
+ks_results_table <- do.call(rbind, ks_results)
+
+# Define the path for saving the results
+pdf_file <- file.path("results", "suppl.figure1.qq_plots_with_tests.pdf")
 
 # Create Q-Q plots for selected variables
-plot_age <- ggplot(df_safepd, aes(sample = age)) +
-  stat_qq() +
-  stat_qq_line() +
-  labs(title = "Q-Q Plot: Age") +
+plot_age <- ggplot(df_safepd, aes(sample = age)) + 
+  stat_qq() +  
+  stat_qq_line() +  
+  labs(title = "Q-Q Plot: Age") +  
   theme_minimal()
 
-plot_updrs1 <- ggplot(df_safepd, aes(sample = UPDRS_I_Score)) +
-  stat_qq() +
-  stat_qq_line() +
-  labs(title = "Q-Q Plot: UPDRS I Score") +
+plot_updrs1 <- ggplot(df_safepd, aes(sample = UPDRS_I_Score)) + 
+  stat_qq() +  
+  stat_qq_line() +  
+  labs(title = "Q-Q Plot: UPDRS I Score") +  
   theme_minimal()
 
-plot_updrs2 <- ggplot(df_safepd, aes(sample = UPDRS_II_Score)) +
-  stat_qq() +
-  stat_qq_line() +
-  labs(title = "Q-Q Plot: UPDRS II Score") +
+plot_updrs2 <- ggplot(df_safepd, aes(sample = UPDRS_II_Score)) + 
+  stat_qq() +  
+  stat_qq_line() +  
+  labs(title = "Q-Q Plot: UPDRS II Score") +  
   theme_minimal()
 
-# Create an empty spacer plot for the 2x2 layout
-empty_plot <- ggplot() +
-  theme_void() +
-  labs(title = "")
+# Create tables for the results
+shapiro_table_grob <- tableGrob(shapiro_results_table, rows = NULL)
+ks_table_grob <- tableGrob(ks_results_table, rows = NULL)
 
-combined_plot <- (plot_age + plot_updrs1) /
-                 (plot_updrs2 + empty_plot) +
-  plot_annotation(
-    title = "Q-Q Plots for Selected Variables"
-  )
+# Open the PDF device
+pdf(pdf_file, width = 8, height = 10)  
 
-message("Normality for different scores in the population. This figure illustrates the Q-Q-plots for age (A), UPDRS I Score (B), and UPDRS II Score (C) in the dataset")
+# Arrange plots and tables in a layout
+# First, display the combined Q-Q plots
+grid.arrange(
+  plot_age, plot_updrs1, plot_updrs2, 
+  ncol = 1, # Arrange the plots in one column
+  heights = c(1, 1, 1) # Make sure each plot gets equal height
+)
 
-#TODO: why these scores?
-  # I don't really understand the question.
-  # We surveyed part 1 and 2 and I wanted to check the distribution, although this is actually already clear from the diagrams (right-skewed distribution).
-  # If necessary, I could omit the test here.
-  # I have added a comment to the sum score of parts 1 and 2 in SAFEPD_dich.R, whether this makes sense?
-  # DP: Sorry, the question was rather why *these* scorese (here). You seem to make an arbitary choice here. Besides, there is some scepticism about the disadvantages of#
-  #         the shapiro.wilk test, as it favors estimates indicating to reject H0 when there are outliers. In fact the qqplot for age (qqnorm(df_safepd$age)) looks quite normally
-  # disttributed. I guess I would ditch this part, especially since a considerable number is categorial or ordinal and it doesn't make too much sense to test them.
+# Add text for Shapiro-Wilk table
+grid.newpage()
+grid.text("Shapiro-Wilk Normality Test Results", y = 0.95, gp = gpar(fontsize = 16, fontface = "bold"))
+grid.arrange(shapiro_table_grob, ncol = 1)
 
-# Save the combined plot as a PDF
-pdf_file <- file.path("results", "suppl.figure1.qq_plots.pdf")
-ggsave(pdf_file, plot = combined_plot, width = 8, height = 8)
+# Add text for Kolmogorov-Smirnov table
+grid.newpage()
+grid.text("Kolmogorov-Smirnov Normality Test Results", y = 0.95, gp = gpar(fontsize = 16, fontface = "bold"))
+grid.arrange(ks_table_grob, ncol = 1)
 
-message("Q-Q plots saved to ", pdf_file)
+# Close the PDF device
+dev.off()
+
+# Save the results as CSV
+write.csv(shapiro_results_table, file.path(wdir, "results", "suppl.table1.shapiro_results.csv"), row.names = FALSE)
+write.csv(ks_results_table, file.path(wdir, "results", "suppl.table1.ks_results.csv"), row.names = FALSE)
+
+message("Q-Q plots and results saved to ", pdf_file)
