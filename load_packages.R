@@ -1,33 +1,42 @@
+# Helper function called in the main script to load necessary packages
+# Code developed by Florian Kuschel, Anna and David Pedrosa
+
+# Sorted package list
 packages <- c(
-  "tidyverse", 
-  "dplyr", 
-  "descr", 
-  "sjmisc", 
-  "sjlabelled", 
-  "sjPlot", 
-  "sjstats", 
-  "easystats", 
-  "ggpubr", 
-  "psych",
-  "tableone", 
-  "mice", 
-  "VIM",
-  "car",
-  "MASS",
   "brant",
-  "gofcat",
-  "pscl",
-  "ordinal",
-  "openxlsx",
-  "gplots",
-  "openxlsx",
+  "car",
+  "caret",
+  "descr",
+  "dplyr",
+  "easystats",
   "ggplot2",
-  "writexl",
+  "ggpubr",
+  "gofcat",
+  "gplots",
+  "grid",
+  "gridExtra",
+  "MASS",
+  "MLmetrics",
+  "mice",
+  "openxlsx",
+  "ordinal",
   "patchwork",
-  "readxl"
+  "psych",
+  "pscl",
+  "purrr",
+  "readxl",
+  "sjlabelled",
+  "sjmisc",
+  "sjPlot",
+  "sjstats",
+  "tableone",
+  "tidyverse",
+  "VIM",
+  "writexl",
+  "yardstick"
 )
 
-## Now load or install & load all if necessary
+# Load or install and load all packages
 package.check <- lapply(
   packages,
   FUN = function(x) {
@@ -37,5 +46,4 @@ package.check <- lapply(
     }
   }
 )
-
 

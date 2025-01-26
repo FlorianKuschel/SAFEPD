@@ -1,26 +1,14 @@
 # Imputation of missing variables/input if feasible
 # Code developed by Florian Kuschel, Anna and David Pedrosa
-
 # Version 1.0 # 2024-09-12, # first draft of code adapted from distinct repository (https://www.github.com/dpedrosac/qol_prospective/)
 
+# ================================================================================================== 
+# 1. Preparing data before imputation
+# ================================================================================================== 
 df_before_imputation <- df_safepd # %>%
 
 #TODO: for the time being, everything is considered. ALthough it makes no sense to impute every variable
 # necessarily. e.g. if there are hardly any numbers outside a specific range such as in nationality
-
-#  dplyr::select(
-#    age_r, sex_r, living_area_r, education_r_r, financial_stability_r,
-#    family_status_r_r, living_situation_r_r, age_at_diagnosis_r,
-#    time_from_diagnosis_r, who5_depr_r, comorb_r, disturbances_sleep_APD,
-#    falls_r, assist_mov_r, ms_fluctuation_APD, qol_sum_disease_r,
-#    qol_ms_r, qol_nms_r, qol_conditions_r, qol_gain_r, qol_loss_independence_r,
-#    qol_unpredict_r, qol_invasive_therapy_r, qol_other_therapy_r,
-#    qol_effect_medication_r, qol_taking_medication_r, qol_family_contact_r,
-#    qol_friends_contact_r, qol_affectp_contact_r, qol_support_yes_r,
-#    qol_stigma_r, qol_leisure_yes_r, qol_finances_r, qol_badmob_r,
-#    qol_badadl_r, qol_sum_ident_r, qol_feeling_needed_r, qol_thoughts_future_r,
-#    qol_self_image_r, qol_religion_r
-#  )
 
 # Percentage of the data that is missing!
 total_missing <- sum(is.na(df_before_imputation))
@@ -54,11 +42,20 @@ text(
 
 dev.off() # Close the PDF device to save the file
 
-# Start imputation
+# ================================================================================================== 
+# 2. Start imputation
+# ================================================================================================== 
 # Define the variables to be included as covariates in each imputation model
-inlist <- c(
-  "age", "sex", "education", "comorb", "time_from_diagnosis",
-  "family_status", "falls", "B012_01", "who5_depr"
+inlist <- c("age", "years_since_diagnosis", "gender",
+            "martial_status", "school_graduation", "persons_houshold", 
+            "professional_graduation", "employment_status", 
+            "lack_of_information",  "uncertain_future",  "chaging_symptom_severity",  "gait_insecurity_fall",  
+            "pain",  "gastrointestinal_symptoms",  "urinary_symptoms", "mental_abilities", "mental_symptoms", "other_disease",  "nursing_care",  "side_effects_complications",  "access_healthcare",
+            "communication_with_me",  "communication_between_professionals",  "loneliness",  "everyday_problems",
+            "daily_routine",  "overload_among_people",  "pejorativ_looks_comments",  "family_role",  
+            "conflicts_with_relatives",  "victim_to_crime",  "not_at_peace_with_myself",  
+            "participation_in_road_traffic",  "overall_situation", 
+            "UPDRS_I_Score", "UPDRS_II_Score", "FIMA_1_Hausarzt", "FIMA_1_Neurologe", "FIMA_2_Krankengymnastik"
 )
 
 # Generate predictor matrix with minimum proportion of usable cases set to 0.5
@@ -83,14 +80,15 @@ generate_imputation <- mice(
 pdf(file.path(getwd(), "results", "suppl_fig1b.densityplots_afterimputation.pdf"), width = 11, height = 8.5)
 
 densityplot(
-  generate_imputation,
-  xlim = c(0, 7),    # Set x-axis range for density plot
-  ylim = c(0, 1)   # Set y-axis range for density plot
+  completed_data,
+  xlim = c(0, 7),
+  ylim = c(0, 1)
 )
+
 dev.off()  # Close the PDF device to save the file
 
-
-imputed_data <- complete(generate_imputation, 1)
+# Save data after imputation
+imputed_data <- complete(generate_imputation, 2)
 if (flag_check) {
   aggr_plot <- aggr(
     imputed_data,
@@ -103,3 +101,5 @@ if (flag_check) {
     ylab = c("Histogram of missing data", "Pattern")
   )
 }
+
+

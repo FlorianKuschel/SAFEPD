@@ -1,12 +1,11 @@
-# Run Descriptive Analysis with TableOne
-
 # Code developed by Florian Kuschel, Anna and David Pedrosa
-# Version 1.0 # 2024-15-12
+# Creates a "TableOne" intended to provide the general information about the analysed population
+# Version 2.0 # 2025-01-19, minor changes and some general suggestions
+# Version 1.0 # 2024-12-15
 
-
-# Create TableOne
-
-# 1.1: Helper function: recodes variables as factors
+# ==================================================================================================
+# 1. Helper function: recodes variables as factors
+# ==================================================================================================
 recode_factors <- function(df, vars, levels_labels = NULL) {
   df[vars] <- lapply(df[vars], function(x) factor(as.character(x)))
   if (!is.null(levels_labels)) {
@@ -20,7 +19,15 @@ recode_factors <- function(df, vars, levels_labels = NULL) {
 # Duplicates df_recoded as df_tableone for clarity
 df_tableone <- df_safepd
 
-# 1.2: Define specific factor levels and labels (TODO: The entire next part MUST be adapted to your data)
+# TODO: This Table is a bit lengthy. In general terms, you want to provide general information on gender, age, specific disease
+# characteristics, etc. A good example is that there are categories with 202/4 patients or 199/6 patients, indicating that almost
+# everyone shares this characteristics. That's something we will exploit later in the regressions; Try to keep a maximum of 10 items;
+# I would especially ditch the FIMA, which - BTW - is not coded so far; but otherwise cool script. Personally, I believe SAFEPD_descr.R
+# and SAFEPD_desc_diag.R has now become obsolete and I would recommend deleting it.
+
+# ==================================================================================================
+# 2. Define specific factor levels and labels
+# ==================================================================================================
 levels_labels <- list(
   gender_Group = list(levels = c("0","1"), labels = c("Female", "Male")),
   nationality_Group = list(levels = c("0", "1"), labels = c("other","german")),
@@ -58,43 +65,46 @@ levels_labels <- list(
   overall_situation_Group = list(levels = c("0", "1"), labels = c("restricted", "unrestricted"))
 )
 
-df_tableone <- recode_factors(df_tableone, names(levels_labels), levels_labels) # TODO: once levels_labels is defined, you should run this line
+df_tableone <- recode_factors(df_tableone, names(levels_labels), levels_labels)
 
-# 1.3: Select variables and create labels for TableOne
-Vars <- c("age", "years_since_diagnosis", "gender_Group", "nationality_Group", "martial_status_Group", 
+# ==================================================================================================
+# 3. Select variables and create labels for TableOne
+# ==================================================================================================
+Vars <- c("age", "years_since_diagnosis", "gender_Group", "nationality_Group", "martial_status_Group",
           "persons_houshold_Group", "school_graduation_Group", "professional_graduation_Group", "employment_status_Group",
-          "lack_of_information_Group", "uncertain_future_Group", "chaging_symptom_severity_Group", "gait_insecurity_fall_Group", 
+          "lack_of_information_Group", "uncertain_future_Group", "chaging_symptom_severity_Group", "gait_insecurity_fall_Group",
           "pain_Group", "gastrointestinal_symptoms_Group", "urinary_symptoms_Group", "mental_abilities_Group", "mental_symptoms_Group",
-          "other_disease_Group", "nursing_care_Group", "side_effects_complications_Group", "access_healthcare_Group", 
-          "communication_with_me_Group", "communication_between_professionals_Group", "loneliness_Group", "everyday_problems_Group", 
-          "daily_routine_Group", "overload_among_people_Group", "pejorativ_looks_comments_Group", "family_role_Group", 
-          "conflicts_with_relatives_Group", "victim_to_crime_Group", "financial_worries_Group", "not_at_peace_with_myself_Group", 
-          "participation_in_road_traffic_Group", "overall_situation_Group", "UPDRS_I_Score", "UPDRS_II_Score", 
-          "FIMA_1_Hausarzt", "FIMA_1_Neurologe", "FIMA_1_Psychiater", "FIMA_1_Internist_FA", "FIMA_1_Gynaekologe", 
-          "FIMA_1_Urologe", "FIMA_1_Orthopaede", "FIMA_1_Notfall_KH", "FIMA_1_other", "FIMA_2_Krankengymnastik", 
-          "FIMA_2_Ergotherapie", "FIMA_2_Sprachtherapie", "FIMA_2_Heilpraktiker", "FIMA_2_Osteopath", "FIMA_2_Chiropraktiker", 
-          "FIMA_2_Psychotherapeut", "FIMA_3", "FIMA_4", "FIMA_5", "FIMA_6", "FIMA_7", "FIMA_8", "FIMA_9", "FIMA_10", 
-          "FIMA_11", "FIMA_12", "FIMA_14", "FIMA_15", "FIMA_16", "FIMA_13_Anzahl")
+          "other_disease_Group", "nursing_care_Group", "side_effects_complications_Group", "access_healthcare_Group",
+          "communication_with_me_Group", "communication_between_professionals_Group", "loneliness_Group", "everyday_problems_Group",
+          "daily_routine_Group", "overload_among_people_Group", "pejorativ_looks_comments_Group", "family_role_Group",
+          "conflicts_with_relatives_Group", "victim_to_crime_Group", "financial_worries_Group", "not_at_peace_with_myself_Group",
+          "participation_in_road_traffic_Group", "overall_situation_Group", "UPDRS_I_Score", "UPDRS_II_Score",
+          "FIMA_1_Hausarzt", "FIMA_1_Neurologe", "FIMA_1_Psychiater", "FIMA_1_Internist_FA", "FIMA_1_Gynaekologe",
+          "FIMA_1_Urologe", "FIMA_1_Orthopaede", "FIMA_1_Notfall_KH", "FIMA_1_other", "FIMA_2_Krankengymnastik",
+          "FIMA_2_Ergotherapie", "FIMA_2_Sprachtherapie", "FIMA_2_Heilpraktiker", "FIMA_2_Osteopath", "FIMA_2_Chiropraktiker",
+          "FIMA_2_Psychotherapeut", "FIMA_3", "FIMA_4", "FIMA_5", "FIMA_6", "FIMA_7", "FIMA_8", "FIMA_9", "FIMA_10",
+          "FIMA_11", "FIMA_12", "FIMA_14", "FIMA_15", "FIMA_16")
 
-colnames_Vars <- c("Age", "Years since diagnosis", "Gender", "Nationality", "Martial status", 
+colnames_Vars <- c("Age", "Years since diagnosis", "Gender", "Nationality", "Martial status",
                    "Houshold size", "School education", "Graduation", "Employment status",
-                   "Lack of Information", "Uncertain Future", "Changing Symptom Severity", "Gait Insecurity Fall", "Pain", 
-                   "Gastrointestinal Symptoms", "Urinary Symptoms", "Mental Abilities", "Mental Symptoms", "Other Disease", 
-                   "Nursing Care", "Side Effects Complications", "Access Healthcare", "Communication With Me", 
-                   "Communication Between Professionals", "Loneliness", "Everyday Problems", "Daily Routine", "Overload Among People", 
-                   "Pejorative Looks Comments", "Family Role", "Conflicts With Relatives", "Victim To Crime", "Financial Worries", 
+                   "Lack of Information", "Uncertain Future", "Changing Symptom Severity", "Gait Insecurity Fall", "Pain",
+                   "Gastrointestinal Symptoms", "Urinary Symptoms", "Mental Abilities", "Mental Symptoms", "Other Disease",
+                   "Nursing Care", "Side Effects Complications", "Access Healthcare", "Communication With Me",
+                   "Communication Between Professionals", "Loneliness", "Everyday Problems", "Daily Routine", "Overload Among People",
+                   "Pejorative Looks Comments", "Family Role", "Conflicts With Relatives", "Victim To Crime", "Financial Worries",
                    "Not At Peace With Myself", "Participation In Road Traffic", "Overall Situation", "UPDRS I", "UPDRS II",
-                   "Visits of General Practitioner", "Visits of Neurologist", "Visits of Psychiatrist", "Visits of Internist", 
-                   "Visits of Gynecologist", "Visits of Urologist", "Visits of Orthopedist", "Visits of Emergency Department", 
-                   "Visits of Other Specialists", "Visits of Physiotherapist", "Visits of Occupational Therapist", 
-                   "Visits of Speech Therapist", "Visits of Alternative Medicine Practitioner", "Visits of Osteopath", 
+                   "Visits of General Practitioner", "Visits of Neurologist", "Visits of Psychiatrist", "Visits of Internist",
+                   "Visits of Gynecologist", "Visits of Urologist", "Visits of Orthopedist", "Visits of Emergency Department",
+                   "Visits of Other Specialists", "Visits of Physiotherapist", "Visits of Occupational Therapist",
+                   "Visits of Speech Therapist", "Visits of Alternative Medicine Practitioner", "Visits of Osteopath",
                    "Visits of Chiropractor", "Visits of Psychotherapist", "Use of Outpatient Care Service",
-                   "Use of Paid Domestic Help", "Help from Family Members or Friends", "Use of Day Care Facility", 
-                   "Nursing Care Level", "Use of Inpatient Rehabilitation Facility", "Use of Day Clinic", "Use of Hospital Treatment", 
-                   "Use of Inpatient Psychiatric Treatment", "Living Situation", "Move in the Last 12 Months", "Insurance Status",
-                   "Number of Assistive Devices")
+                   "Use of Paid Domestic Help", "Help from Family Members or Friends", "Use of Day Care Facility",
+                   "Nursing Care Level", "Use of Inpatient Rehabilitation Facility", "Use of Day Clinic", "Use of Hospital Treatment",
+                   "Use of Inpatient Psychiatric Treatment", "Living Situation", "Move in the Last 12 Months", "Insurance Status")
 
-# 1.4: TableOne function
+# ==================================================================================================
+# 4. TableOne function
+# ==================================================================================================
 create_table_one <- function(df, vars, colnames_vars, factor_vars) {
   df_tableOne <- df %>% dplyr::select(all_of(vars))
   colnames(df_tableOne) <- colnames_vars
@@ -103,14 +113,18 @@ create_table_one <- function(df, vars, colnames_vars, factor_vars) {
   return(results.tableOne)
 }
 
-# Create the TableOne and display
+# ==================================================================================================
+# 5. Create the TableOne and display
+# ==================================================================================================
 factVars <- colnames_Vars[-c(1, 2, 37, 38)]  # Exclude continuous variables
 results.tableOne <- create_table_one(df_tableone, Vars, colnames_Vars, factVars)
 print(head(df_tableone))
 
-# 1.5: Export TableOne to MS Excel file
-export_table_one <- function(results, filename = "Table1.xlsx") {
-  tableOne_matrix <- print(results, nonnormal = c("Years since diagnosis", "UPDRS I", "UPDRS II"), showAllLevels = TRUE)
+# ==================================================================================================
+# 6. Export TableOne to MS Excel file
+# ==================================================================================================
+export_table_one <- function(results, filename = "Table1.general_demographics.v1.0.xlsx") {
+  tableOne_matrix <- print(results, nonnormal = c("Years since diagnosis", "UPDRS I", "UPDRS II"), showAllLevels = FALSE) # TODO: I have changed this to FALSE, so that the table is clearer. In general you may consider some "more catchy" descriptions.
   tableOne_with_rowname <- cbind(Variable = rownames(tableOne_matrix), tableOne_matrix)
   
   wb1 <- createWorkbook()
