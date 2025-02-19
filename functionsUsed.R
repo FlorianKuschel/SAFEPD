@@ -2,9 +2,10 @@
 # SAFEPD - Functions Script
 # Developed by Florian Kuschel, Anna and David Pedrosa
 # Version 1.0 (2025-01-19)
+# Version 2.0 (2025-02-19): adapted line 96-98 with ROC-function, somehow it didnt work for me with the original code
 # --------------------------------------------------------------------------------------------------
 # This script defines reusable functions for estimating models, performing bootstrap CI calculations,
-# printing AUC results, and comparing models using plots. It is designed to support "SAFEPD_penalised.R."
+# printing AUC results, and comparing models using plots. It is designed to support "SAFEPD_regression.R."
 # ==================================================================================================
 
 # ==================================================================================================
