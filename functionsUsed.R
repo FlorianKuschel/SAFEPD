@@ -92,7 +92,9 @@ results_modelSAFETYmod <- function(method, data, train_control, tunegrid = NULL,
   predictedLabelsBinary <- as.numeric(mdl_caret_prob$caret_results == "yes")
   
   estimated_model$LogLoss[1] <- LogLoss(mdl_caret_prob$yes, trueLabelsBinary_full)
-  estimated_model$AUC[1] <- AUC(mdl_caret_prob$yes, trueLabelsBinary_full)
+  roc_obj <- pROC::roc(trueLabelsBinary_full, mdl_caret_prob$yes)
+  auc_value <- as.numeric(pROC::auc(roc_obj))
+  estimated_model$AUC[1] <- auc_value
   estimated_model$Accuracy[1] <- mdl_caret_matrix$overall[[1]]
   
   return(list(model = mdl_caret, metrics = estimated_model, confusion_matrix = mdl_caret_matrix))
