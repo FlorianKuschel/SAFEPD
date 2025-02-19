@@ -3,14 +3,6 @@
 # Version 2.0 # 2025-01-19, minor changes and some general suggestions
 # Version 1.0 # 2024-12-15
 
-# TODO: This Table is a bit lengthy. In general terms, you want to provide general information on gender, age, specific disease
-# characteristics, etc. A good example is that there are categories with 202/4 patients or 199/6 patients, indicating that almost
-# everyone shares this characteristics. That's something we will exploit later in the regressions; Try to keep a maximum of 10 items;
-# I would especially ditch the FIMA, which - BTW - is not coded so far; but otherwise cool script. Personally, I believe SAFEPD_descr.R
-# and SAFEPD_desc_diag.R has now become obsolete and I would recommend deleting it.
-# TODO: I have tidied up the tables and now show the variables that also appear in the regression in Table 1. 
-# For the results, the items of the safety questionnaire are then shown in a seperate table
-
 # ==================================================================================================
 # 1. Helper function: recodes variables as factors
 # ==================================================================================================
@@ -35,13 +27,21 @@ create_table_one <- function(df, vars, colnames_vars, factor_vars) {
   df_tableOne <- df %>% dplyr::select(all_of(vars))
   colnames(df_tableOne) <- colnames_vars
   results.tableOne <- CreateTableOne(vars = colnames_vars, factorVars = factor_vars, data = df_tableOne)
-  print(results.tableOne, nonnormal = c("Years since diagnosis", "UPDRS I", "UPDRS II"), showAllLevels = TRUE)
+  print(results.tableOne, nonnormal = c("Years since diagnosis", "UPDRS II"), showAllLevels = TRUE)
   return(results.tableOne)
 }
 
 # ==================================================================================================
 # 3. Define specific factor levels and labels
 # ==================================================================================================
+# TODO: This Table is a bit lengthy. In general terms, you want to provide general information on gender, age, specific disease
+# characteristics, etc. A good example is that there are categories with 202/4 patients or 199/6 patients, indicating that almost
+# everyone shares this characteristics. That's something we will exploit later in the regressions; Try to keep a maximum of 10 items;
+# I would especially ditch the FIMA, which - BTW - is not coded so far; but otherwise cool script. Personally, I believe SAFEPD_descr.R
+# and SAFEPD_desc_diag.R has now become obsolete and I would recommend deleting it.
+# TODO: I have tidied up the tables and now show the variables that also appear in the regression in Table 1. 
+# For the results, the items of the safety questionnaire are then shown in a seperate table
+                     
 levels_labels <- list(
   gender_Group = list(levels = c("0","1"), labels = c("Female", "Male")),
   nationality_Group = list(levels = c("0", "1"), labels = c("other","german")),
@@ -86,12 +86,13 @@ df_tableone_after_imputation <- recode_factors(df_tableone_after_imputation, nam
 # ==================================================================================================
 # 4.1. Select variables and create labels for TableOne
 # ==================================================================================================
-Vars <- c("age", "years_since_diagnosis", "gender_Group", "nationality_Group", "martial_status_Group",
-          "persons_houshold_Group", "school_graduation_Group", "professional_graduation_Group", "employment_status_Group",
+Vars <- c("age", "years_since_diagnosis", "gender_Group", "nationality_Group", 
+          "martial_status_Group", "persons_houshold_Group", "school_graduation_Group", 
+          "professional_graduation_Group", "employment_status_Group",
           "UPDRS_I_Score", "UPDRS_II_Score", "FIMA_1_Hausarzt", "FIMA_1_Neurologe", "FIMA_2_Krankengymnastik")
 
-colnames_Vars <- c("Age", "Years since diagnosis", "Gender", "Nationality", "Martial status",
-                   "Houshold size", "School education", "Graduation", "Employment status",
+colnames_Vars <- c("Age", "Years since diagnosis", "Gender", "Nationality", 
+                   "Martial status", "Houshold size", "School education", "Graduation", "Employment status",
                    "UPDRS I", "UPDRS II", "Visits of General Practitioner", "Visits of Neurologist", "Visits of Physiotherapist")
 
 # ==================================================================================================
