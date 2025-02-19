@@ -11,6 +11,9 @@
 # TODO: Verify the number of factors in the dataset. If there are additional factors, consider letting the
 # model handle variable selection to reduce complexity. Otherwise, restrict variables only if you have
 # clear a priori knowledge to justify it.
+# TODO: I use all the socio-demographic data collected, the UPDRS and 3 items regarding the use of healthcare services, 
+# the FIMA would otherwise have even more variables, but in some cases very small groups 
+# but we had actually discussed leaving these out after all
 
 # Step 1: Define Variables of Interest
 variables_of_interest <- c(
@@ -32,11 +35,6 @@ variables_of_interest <- c(
 
 # Step 2: Prepare Data
 # Convert `overall_situation_Group` to a factor with levels "yes" and "no"
-df_safepd <- df_safepd %>%
-  mutate(overall_situation_Group_factor = factor(
-    ifelse(overall_situation_Group == 0, "no", "yes")
-  ))
-
 imputed_data <- imputed_data %>%
   mutate(overall_situation_Group_factor = factor(
     ifelse(overall_situation_Group == 0, "no", "yes")
@@ -55,7 +53,6 @@ index <- createDataPartition(
 
 train_data <- data_full_glmSAFETY[index, ]  # Training dataset (here 80%)
 test_data <- data_full_glmSAFETY[-index, ]  # Testing dataset (here 20%)
-
 
 # ==================================================================================================
 # Train Control Configuration for Model Training
@@ -212,31 +209,36 @@ dev.off()
 # Plot confidence intervals from the penalised model for all significant factors - SAFETY
 pdf(file = file.path(wdir, "results", "Figure2.coefsBootstrapPenalisedModelSAFETY.v1.0.pdf"))
 zero_counts <- colSums(CI_pen[[2]] == 0)
-significant_predictors <- names_predictors[zero_counts/1000<.05]
-idx_CIpen <- rownames(coefs)[which(coefs!=0)]
+significant_predictors <- names_predictors[zero_counts/1000 < .05]
+idx_CIpen <- rownames(coefs)[which(coefs != 0)]
+idx_CIpen <- gsub("Yes$", "", idx_CIpen)
 colnames(CI_pen[[2]]) <- names_predictors
-data2plot <- CI_pen[[2]] %>% dplyr::select(all_of(idx_CIpen)) %>% dplyr::select(-"(Intercept)")
-colnames(data2plot) <- c( "gender_Group",
-                          "martial_status_Group",
-                          "UPDRS_I_Score", 
-                          "UPDRS_II_Score",               
-                          "FIMA_1_Hausarzt", 
-                          "FIMA_1_Neurologe",
-                          "FIMA_2_Krankengymnastik")
+data2plot <- CI_pen[[2]] %>%
+  dplyr::select(all_of(idx_CIpen)) %>%
+  dplyr::select(-"(Intercept)")
+colnames(data2plot) <- c(
+  "Geschlecht",
+  "UPDRS I\nScore",
+  "UPDRS II\nScore"
+)
 ggplot(stack(data2plot), aes(x = ind, y = values)) +
   geom_boxplot() +
-  ylim(c(-2,2)) +
+  ylim(c(-2, 2)) +
   scale_x_discrete(labels = colnames(data2plot)) +
   theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 8),  # Dreht x-Achse-Beschriftung
+    plot.margin = margin(10, 10, 50, 10),  # Mehr Platz unten
+    plot.title = element_text(size = 10, hjust = 0.5),  # Zentriert den Titel
+    plot.title.position = "plot" 
+  ) +
   labs(
     y = "",
     x = "",
     fill = NULL,
-    title = "Bootstrapped coefficients for the penalised\n regression model (ElasticNet) \nDependent variable: Safety ",
-    caption = "") +
-  #stat_summary(fun.y="median", colour="red", geom="text", show_guide = FALSE, position = position_dodge(width = .75),
-  #       aes( label=round(..y.., digits=2)))
-  theme(plot.title = element_text(size=22)) +
+    title = "Koeffizienten durch Bootstrapping für das penalisierte Regressionsmodell (ElasticNet)\n
+             Abhängige Variable: Sicherheit"
+  ) +
   scale_fill_brewer(palette = 1)
 dev.off()
 
@@ -246,12 +248,10 @@ mdl_pen_final         <- mdl_penSAFETY[[1]]
 coefs <- data.frame(as.matrix(coef(mdl_pen_final$finalModel, mdl_pen_final$bestTune$lambda)))
 sig_predictors         <- which(coefs != 0)
 mdl_pen_sig         <- data.frame(predictor = c("(Intercept)", "gender_Group", 
-                                                "martial_status_Group", "UPDRS_I_Score",
-                                                "UPDRS_II_Score", "FIMA_1_Hausarzt", "FIMA_1_Neurologe",
-                                                "FIMA_2_Krankengymnastik"),
+                                                 "UPDRS_I_Score", "UPDRS_II_Score"),
                                                                  coef=coefs[sig_predictors,])
 
-write.csv(mdl_pen_sig, file.path(wdir, "results", "table2.ResultsElasticNet_modelSAFETY.v1.0.csv"),
+write.csv(mdl_pen_sig, file.path(wdir, "results", "table3.ResultsElasticNet_modelSAFETY.v1.0.csv"),
           row.names = T) # csv-file may be easily imported into text processing software
 
 # ==================================================================================================
@@ -261,6 +261,18 @@ mdl_step_final         <- mdl_stepSAFETY[[1]]
 mdl_step_sig         <- data.frame(summary(mdl_step_final)$coef)
 sig_predictors <- which(mdl_step_sig[,4]<.05 | mdl_step_sig[,4]>.95)
 mdl_step_sig         <- mdl_step_sig[sig_predictors, ]
-rownames(mdl_step_sig) <- c("gender_Group", "UPDRS_I_Score", "FIMA_1_Neurologe")
-write.csv(mdl_step_sig, file.path(wdir, "results", "table3.ResultsStepWiseReduced_modelSAFETY.v1.0.csv"),
+rownames(mdl_step_sig) <- c("gender_Group", "UPDRS_I_Score")
+
+write.csv(mdl_step_sig, file.path(wdir, "results", "table4.ResultsStepWiseReduced_modelSAFETY.v1.0.csv"),
           row.names = T) # csv-file may be easily imported into text processing software
+
+# ==================================================================================================
+# Create table for full model - SAFETY
+mdl_full_final <- mdl_fullSAFETY[[1]]
+coefs_full <- data.frame(summary(mdl_full_final)$coef)
+sig_predictors_full <- which(coefs_full[, 4] < .05 | coefs_full[, 4] > .95) 
+mdl_full_sig <- coefs_full[sig_predictors_full, ]
+rownames(mdl_full_sig) <- rownames(coefs_full)[sig_predictors_full]
+
+write.csv(mdl_full_sig, file.path(wdir, "results", "table5.ResultsFull_modelSAFETY.v1.0.csv"),
+          row.names = TRUE)
