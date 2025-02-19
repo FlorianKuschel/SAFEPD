@@ -3,6 +3,11 @@
 # Version 1.0 # 2024-09-12, # first draft of code adapted from distinct repository (https://www.github.com/dpedrosac/qol_prospective/)
 # Version 2.0 # 2025-19-01, # small change so only "inlist"-variables are considered for imputation
 
+
+# TODO: for the time being, everything is considered. ALthough it makes no sense to impute every variable
+# necessarily. e.g. if there are hardly any numbers outside a specific range such as in nationality
+# TODO: tidied up the needed variables for imputation
+
 # ================================================================================================== 
 # 1. Preparing data before imputation
 # ================================================================================================== 
