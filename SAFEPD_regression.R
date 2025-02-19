@@ -211,13 +211,13 @@ pdf(file = file.path(wdir, "results", "Figure2.coefsBootstrapPenalisedModelSAFET
 zero_counts <- colSums(CI_pen[[2]] == 0)
 significant_predictors <- names_predictors[zero_counts/1000 < .05]
 idx_CIpen <- rownames(coefs)[which(coefs != 0)]
-idx_CIpen <- gsub("Yes$", "", idx_CIpen)
 colnames(CI_pen[[2]]) <- names_predictors
 data2plot <- CI_pen[[2]] %>%
   dplyr::select(all_of(idx_CIpen)) %>%
   dplyr::select(-"(Intercept)")
 colnames(data2plot) <- c(
   "Geschlecht",
+  "Familienstand",
   "UPDRS I\nScore",
   "UPDRS II\nScore"
 )
@@ -247,7 +247,7 @@ dev.off()
 mdl_pen_final         <- mdl_penSAFETY[[1]]
 coefs <- data.frame(as.matrix(coef(mdl_pen_final$finalModel, mdl_pen_final$bestTune$lambda)))
 sig_predictors         <- which(coefs != 0)
-mdl_pen_sig         <- data.frame(predictor = c("(Intercept)", "gender_Group", 
+mdl_pen_sig         <- data.frame(predictor = c("(Intercept)", "gender_Group", "martial_status_Group", 
                                                  "UPDRS_I_Score", "UPDRS_II_Score"),
                                                                  coef=coefs[sig_predictors,])
 
@@ -276,3 +276,4 @@ rownames(mdl_full_sig) <- rownames(coefs_full)[sig_predictors_full]
 
 write.csv(mdl_full_sig, file.path(wdir, "results", "table5.ResultsFull_modelSAFETY.v1.0.csv"),
           row.names = TRUE)
+
