@@ -21,6 +21,7 @@ packages <- c(
   "openxlsx",
   "ordinal",
   "patchwork",
+  "pROC",
   "psych",
   "pscl",
   "purrr",
@@ -32,8 +33,7 @@ packages <- c(
   "tableone",
   "tidyverse",
   "VIM",
-  "writexl",
-  "yardstick"
+  "writexl"
 )
 
 # Load or install and load all packages
@@ -46,4 +46,3 @@ package.check <- lapply(
     }
   }
 )
-
