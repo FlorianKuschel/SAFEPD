@@ -66,16 +66,7 @@ source("SAFEPD_distribution.R")
 # --------------------------------------------------------------------------------------------------
 
 # 3.3 Descriptive analyses
-# source("SAFEPD_descr.R")
 source("SAFEPD_TableOne.R")
-# source("SAFEPD_descr_diag.R")
 
 # 3.4 Regression analysis
-# source("SAFEPD_reg.R")
 source("SAFEPD_regression.R")
-
-# 3.5 Hypothesis testing
-# source("SAFEPD_hypothesis.R")
-
-# 3.6 Data reconciliation and discussion #TODO: What is this?
-# source("SAFEPD_disc.R")
