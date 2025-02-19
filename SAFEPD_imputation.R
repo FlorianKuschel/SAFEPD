@@ -7,9 +7,6 @@
 # ================================================================================================== 
 df_before_imputation <- df_safepd # %>%
 
-#TODO: for the time being, everything is considered. ALthough it makes no sense to impute every variable
-# necessarily. e.g. if there are hardly any numbers outside a specific range such as in nationality
-
 # Percentage of the data that is missing!
 total_missing <- sum(is.na(df_before_imputation))
 total_values <- prod(dim(df_before_imputation))
@@ -42,6 +39,9 @@ text(
 
 dev.off() # Close the PDF device to save the file
 
+# TODO: for the time being, everything is considered. ALthough it makes no sense to impute every variable
+# necessarily. e.g. if there are hardly any numbers outside a specific range such as in nationality
+# TODO: I tidied up the variables for imputation
 # ================================================================================================== 
 # 2. Start imputation
 # ================================================================================================== 
@@ -75,12 +75,11 @@ generate_imputation <- mice(
   diagnostics = TRUE     # Enable diagnostics
 )
 
-
 # Generate and save density plot to PDF in landscape orientation
 pdf(file.path(getwd(), "results", "suppl_fig1b.densityplots_afterimputation.pdf"), width = 11, height = 8.5)
 
 densityplot(
-  completed_data,
+  generate_imputation,
   xlim = c(0, 7),
   ylim = c(0, 1)
 )
@@ -101,5 +100,3 @@ if (flag_check) {
     ylab = c("Histogram of missing data", "Pattern")
   )
 }
-
-
